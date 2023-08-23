@@ -1,21 +1,43 @@
 const { JSDOM } = require("jsdom");
 
-async function crawlPage(url) {
+async function crawlPage(baseURL, currentURL, pages) {
+  const baseURLObj = new URL(baseURL);
+  const currentURLObj = new URL(currentURL);
+  if (baseURLObj.hostname !== currentURLObj.hostname) {
+    return pages;
+  }
+
+  const normaliseCurrentURL = normaliseUrl(currentURL);
+  if (pages[normaliseCurrentURL] > 0) {
+    pages[normaliseCurrentURL]++;
+    return pages;
+  }
+
+  pages[normaliseCurrentURL] = 1;
+  console.log("Crawling: " + currentURL);
+
   try {
-    const response = await fetch(url);
+    const response = await fetch(currentURL);
     if (response.status > 399) {
-      console.log("Error in fetch: " + response.status + ", on URL: " + url);
-      return;
+      console.log(
+        "Error in fetch: " + response.status + ", on URL: " + baseURL
+      );
+      return pages;
     }
     const contentType = response.headers.get("content-type");
     if (!contentType || !contentType.includes("text/html")) {
-      console.log("Not HTML: " + contentType + ", on URL: " + url);
-      return;
+      console.log("Not HTML: " + contentType + ", on URL: " + baseURL);
+      return pages;
     }
-    console.log("Response text " + (await response.text()));
+    const htmlBody = await response.text();
+    const nextURLs = getURLsFromHTML(htmlBody, baseURL);
+    for (const nextURL of nextURLs) {
+      pages = await crawlPage(baseURL, nextURL, pages);
+    }
   } catch (error) {
     console.log("Error in fetch: " + error + ", on URL: " + url);
   }
+  return pages;
 }
 
 function getURLsFromHTML(body, baseURL) {
