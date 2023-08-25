@@ -1,3 +1,7 @@
+const fs = require('fs');
+const path = require('path');
+
+
 function sortPages(pages) {
   const pagesArray = Object.entries(pages);
   pagesArray.sort((a, b) => b[1] - a[1]);
@@ -15,4 +19,15 @@ function printReport(pages) {
   console.log("==================");
 }
 
-module.exports = { sortPages, printReport };
+function saveReport(fileName, pages) {
+  const outputFolder = 'output';
+  // Create the output folder if it doesn't exist
+  if (!fs.existsSync(outputFolder)) {
+      fs.mkdirSync(outputFolder);
+  }
+
+  const outputFile = path.join(outputFolder, `${fileName}.txt`);
+  fs.writeFileSync(outputFile, Object.keys(pages).join("\n"), 'utf-8');
+}
+
+module.exports = { sortPages, printReport, saveReport };

@@ -1,5 +1,5 @@
 const { crawlPage } = require("./crawl");
-const { printReport } = require("./report");
+const { printReport, saveReport } = require("./report");
 
 async function main() {
   if (process.argv.length < 3) {
@@ -12,6 +12,9 @@ async function main() {
   }
   const baseURL = process.argv[2];
   const pages = await crawlPage(baseURL, baseURL, {});
+
+  const fileName = new URL(baseURL).hostname.split('.')[0];
+  saveReport(fileName, pages);
 
   printReport(pages);
 }
