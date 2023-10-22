@@ -15,7 +15,7 @@ async function main() {
   if (process.argv[2] === "--yc-companies") {
     fs.readFile('output/yc_companies.txt', 'utf8', (err, data) => {
       if (err) {
-        console.error(err);
+        console.error("Please run yc_scraper.py in web-scrapper directory first");
         return;
       }
       const urls = data.split('\n');
