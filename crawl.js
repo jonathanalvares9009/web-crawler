@@ -35,7 +35,7 @@ async function crawlPage(baseURL, currentURL, pages) {
       pages = await crawlPage(baseURL, nextURL, pages);
     }
   } catch (error) {
-    console.log("Error in fetch: " + error + ", on URL: " + url);
+    console.log("Error in fetch: " + error + ", on URL: " + currentURL);
   }
   return pages;
 }
