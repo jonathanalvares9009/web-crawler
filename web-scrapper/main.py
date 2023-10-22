@@ -29,15 +29,25 @@ def render_spa(url):
 
 def parser(url):
     # Send a GET request to the URL
-    response = requests.get(url)
+    response = render_spa(url)
     # Check if the request was successful
-    if response.status_code == 200:
+    if response:
         # Parse the HTML content using Beautiful Soup
-        soup = BeautifulSoup(response.content, "html.parser")
+        soup = BeautifulSoup(response, "html.parser")
+
+        tags = {}
+
+        for tag in soup.find_all():
+            if tag.name == "script" or tag.name == "style" or tag.name == "head" or tag.name == "body" or tag.name == "html":
+                continue
+            # if tag present in tags, then add to the list
+            if tag.name in tags:
+                tags[tag.name].append(tag.text)
+            # else create a new list
+            else:
+                tags[tag.name] = [tag.text]
         
-        # Extract and print only the text
-        text_without_tags = soup.get_text()
-        return text_without_tags
+        return tags
     else:
         print("Failed to retrieve the web page")
 
@@ -52,7 +62,7 @@ def save_parsed_result(folder_name, data):
     for key, content in data.items():
         file_name = f"{folder_name}/{key.replace('/', '.')}.txt"
         with open(file_name, 'w') as file:
-            file.write(content)
+            file.write(str(content))
         print(f"File '{file_name}' created with content.")
     
 
@@ -66,8 +76,8 @@ if __name__ == "__main__":
         # Loop over each line in the file
         for line in file:
             url = f"https://{line.strip()}"
-            # parsed_content[line.strip()] = parser(url)
-            print(render_spa(url))
+            parsed_content[line.strip()] = parser(url)
+            # print(render_spa(url))
 
     
 
